@@ -1,0 +1,27 @@
+# raw data (World Bank terms: no redistribution)
+data/
+
+# course files not part of the project
+Groups ECON 434.xlsx
+Instructions for Project.docx
+
+# Office lock files
+~$*
+
+# R
+.RData
+.Rhistory
+.Rproj.user/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
