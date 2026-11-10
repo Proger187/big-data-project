@@ -9,6 +9,7 @@ Topic and data: see `docs/IDEAS.md` and `docs/DATA.md`.
 | File / folder | What it is |
 |---|---|
 | `CLAUDE.md` | instructions for any AI assistant — **read first** (`AGENTS.md` points to it) |
+| `docs/PROJECT.md` | project idea, methodology, data, current results — **start here** |
 | `docs/GIT_RULES.md` | what and how we push, conditions |
 | `docs/WORKLOG.md` | report of work done (newest on top) |
 | `docs/IDEAS.md` | ideas, decisions and open questions |
