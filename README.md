@@ -2,7 +2,7 @@
 
 Introduction to Big Data Analytics, Fall 2026.
 Topic and data: see `docs/IDEAS.md` and `docs/DATA.md`.
-**Deadline: 9 November 2026.**
+**Deadline: 16 November 2026.**
 
 ## Repository map
 
@@ -10,6 +10,7 @@ Topic and data: see `docs/IDEAS.md` and `docs/DATA.md`.
 |---|---|
 | `CLAUDE.md` | instructions for any AI assistant — **read first** (`AGENTS.md` points to it) |
 | `docs/PROJECT.md` | project idea, methodology, data, current results — **start here** |
+| `docs/PLAN.md` | work plan, roles, shared calculation rules — **ask your AI "what should I do?"** |
 | `docs/GIT_RULES.md` | what and how we push, conditions |
 | `docs/WORKLOG.md` | report of work done (newest on top) |
 | `docs/IDEAS.md` | ideas, decisions and open questions |
