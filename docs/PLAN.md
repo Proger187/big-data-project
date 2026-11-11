@@ -39,31 +39,30 @@
 
 ### Все вместе — этап 0 (10–11 ноября)
 
-- [ ] Решить язык кода: R или Python → записать в `docs/IDEAS.md` (D6). **Без этого код не начинаем.**
+- [ ] Подтвердить язык кода: этап 1 написан на **R** (D6, 🗣) — группе подтвердить.
 - [ ] Подтвердить в группе D10 (направление), D11 (Y1–Y5), D12 (роли) в `docs/IDEAS.md`.
-- [ ] Каждый: скачать ACS **2016** 1-year PUMS, файлы по людям (`csv_pus.zip`, внутри `psam_pusa.csv` и `psam_pusb.csv`). Ссылка: census.gov → ACS → Microdata → Access (https://www.census.gov/programs-surveys/acs/microdata/access.html), FTP → 2016 → 1-Year.
+- [x] Aibek скачал ACS 2016 (файлы `ss16pusa.csv`, `ss16pusb.csv`). Остальным сырые данные не нужны — берут готовые `.rds` (этап 1).
 - [ ] Скачать PUMS Data Dictionary 2016, 2019, 2022: https://www.census.gov/programs-surveys/acs/microdata/documentation.html
-- [ ] Каждый: разложить данные одинаково (D8): `data/acs2016/`, `data/acs2019/`, `data/acs2022/` — в каждой `psam_pusa.csv`, `psam_pusb.csv`.
+- [x] Раскладка сырых файлов — как у Aibek в `data/`, пути заданы в `RAW_FILES` в начале `code/01_prepare_data.R` (D8 не понадобился).
 
 ### Aibek
 
-- [ ] **Этап 1. `code/01_load.*`** — для 2016, 2019, 2022: прочитать `psam_pusa` + `psam_pusb` только с нужными колонками (список ниже), склеить, добавить `year`.
-- [ ] **Этап 1. `code/02_clean.*`** — посчитать X и Y1–Y5 строго по «Общим правилам», сохранить `data/processed/acs_2016`, `acs_2019`, `acs_2022` (формат зависит от языка). Выложить их в общую папку Google Drive для Ailana и Aiym (в git не кладём).
-- [ ] **Этап 1. `code/03_eda.*`** — взвешенные средние Y1–Y5 по годам (2016, 2019, 2022) → `outputs/eda_means_by_year.csv`. Сверить 2019 и 2022 с таблицей 4.1 в `docs/PROJECT.md`.
+- [x] **Этап 1. `code/01_prepare_data.R`** (11.11) — один скрипт вместо 01–03: читает сырые файлы 2016, 2019, 2022, считает X и Y1–Y5, сохраняет `data/processed/acs_<год>.rds` (люди 18–64, ~1.9 млн строк и ~24 MB на год), пишет `outputs/prep_checks.csv` и `outputs/eda_means_by_year.csv`. 2019 и 2022 совпали с таблицей 4.1 в `docs/PROJECT.md`, дублей и пропусков в X нет.
+- [ ] Выложить `data/processed/acs_2016.rds`, `acs_2019.rds`, `acs_2022.rds` в общую папку Google Drive для Ailana и Aiym.
 - [ ] **Этап 2. `code/04_models_y5.*`** — Y5 бедность: полный цикл (раздел «Цикл для каждого показателя»).
 - [ ] **Этап 2. `code/06_clusters.*`** — работники 25–64, 2019 + 2022: стандартизация → PCA → k-means, описание кластеров, доли по годам → `outputs/clusters_*.csv`, графики. Подробно — шаг 6 в `docs/PROJECT.md`.
 - [ ] **Этап 3.** Собрать `code/05_results.*` и сводную таблицу (см. этап 3 ниже).
 
 ### Ailana
 
-- [ ] **Этап 1.** Проверить `01_load` и `02_clean` от Aibek: запустить у себя, сверить определения Y и X с «Общими правилами», написать замечания.
+- [ ] **Этап 1.** Проверить `code/01_prepare_data.R` от Aibek (разделы 3–4: признаки X и показатели Y) — сверить с «Общими правилами», написать замечания.
 - [ ] **Этап 2 (можно начинать до готовности этапа 1 на `data/acs2019/psam_pusa.csv`).** `code/04_models_y1_y2.*` — Y1 занятость: полный цикл.
 - [ ] **Этап 2.** Там же — Y2 безработица: полный цикл. Редкий класс: кроме test error смотреть AUC, подобрать порог; в отчёте объяснить, почему accuracy тут обманчива.
 - [ ] **Этап 3.** Запустить и разобрать код Aiym (Y3, Y4) — уметь объяснить его на защите.
 
 ### Aiym
 
-- [ ] **Этап 1.** Проверить `03_eda` от Aibek: совпадают ли средние с таблицей 4.1 в `docs/PROJECT.md`.
+- [ ] **Этап 1.** Проверить `outputs/eda_means_by_year.csv` и `outputs/prep_checks.csv` от Aibek: совпадают ли средние с таблицей 4.1 в `docs/PROJECT.md`.
 - [ ] **Этап 2 (можно начинать до готовности этапа 1 на `data/acs2019/psam_pusa.csv`).** `code/04_models_y3_y4.*` — Y3 реальная зарплата (log): полный цикл.
 - [ ] **Этап 2.** Там же — Y4 часы работы в неделю: полный цикл.
 - [ ] **Этап 3.** Запустить и разобрать код Aibek (Y5, кластеры) — уметь объяснить его на защите.
@@ -96,7 +95,7 @@
 
 ### Колонки, которые читаем из сырых файлов
 
-`SERIALNO, SPORDER, ST, REGION, PWGTP, ADJINC, AGEP, SEX, SCHL, RAC1P, HISP, NATIVITY, CIT, MAR, ESR, WAGP, WKHP, POVPIP`
+`SERIALNO, SPORDER, ST, PWGTP, ADJINC, AGEP, SEX, SCHL, RAC1P, HISP, NATIVITY, CIT, MAR, ESR, WAGP, WKHP, POVPIP` + для кластеров `JWTRNS` (в 2016 — `JWTR`), `COW`, `JWMNP`
 
 В 2016 `SERIALNO` — число, с 2017 — строка (`2019HU…`). Храним как строку.
 
@@ -113,7 +112,7 @@
 | `citizen` | `CIT` | 1, если `CIT` ≠ 5 |
 | `marital` | `MAR` | 5 категорий как есть (1 married … 5 never married) |
 | `state` | `ST` | категория (51) |
-| `region` | `REGION` | категория (4) — только для разбивки результатов, не в модели |
+| `region` | `ST` | 4 региона Census по штату (в файле 2016 нет `REGION`) — только для разбивки результатов, не в модели |
 
 ### Показатели Y
 
@@ -126,6 +125,12 @@
 | `y5_poor` | 18–64, `POVPIP` не пусто | 1, если `POVPIP` < 100, иначе 0 |
 
 CPI-U (среднегодовой): 2016 = 240.007, 2019 = 255.657, 2022 = 292.655.
+
+### Готовые данные (`data/processed/acs_<год>.rds`)
+
+Загрузка: `dt <- readRDS("data/processed/acs_2019.rds")` (это `data.table`).
+Люди 18–64, по году 1.9–2.0 млн строк. Колонки: `year, SERIALNO, SPORDER, PWGTP`, признаки X (таблица выше), `y1_employed … y5_poor`, а также `wage_real` (зарплата в $ 2022), `wfh`, `selfemp`, `commute_min` — для кластеров.
+Для модели по конкретному Y берём строки, где этот Y не `NA`.
 
 ### Настройки расчётов
 
@@ -147,7 +152,7 @@ CPI-U (среднегодовой): 2016 = 240.007, 2019 = 255.657, 2022 = 292.6
 
 | Файл | Владелец |
 |---|---|
-| `code/01_load.*`, `code/02_clean.*`, `code/03_eda.*` | Aibek |
+| `code/01_prepare_data.R` | Aibek |
 | `code/04_models_y1_y2.*` | Ailana |
 | `code/04_models_y3_y4.*` | Aiym |
 | `code/04_models_y5.*`, `code/06_clusters.*` | Aibek |
