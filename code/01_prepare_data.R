@@ -36,13 +36,15 @@ CPI_BASE <- CPI[["2022"]]
 # Columns we read from the raw files (everything else is skipped)
 COLS_MAIN  <- c("SERIALNO", "SPORDER", "ST", "PWGTP", "ADJINC",
                 "AGEP", "SEX", "SCHL", "RAC1P", "HISP", "NATIVITY", "CIT", "MAR",
-                "ESR", "WAGP", "WKHP", "POVPIP")
+                "ESR", "WAGP", "WKHP", "POVPIP",
+                "YOEP", "WAOB", "SCIENGP", "FOD1P", "PAOC")         # extra features (docs/VARIABLES.md, group B)
 COLS_EXTRA <- c("JWTRNS", "JWTR", "COW", "JWMNP")  # for worker clusters; JWTR = old name of JWTRNS
 
 # Columns saved in the processed files
 KEEP <- c("year", "SERIALNO", "SPORDER", "PWGTP",
           "age", "female", "educ", "race", "hispanic", "foreign_born", "citizen",
           "marital", "state", "region",
+          "years_in_us", "birth_region", "stem_degree", "degree_field", "children",
           "y1_employed", "y2_unemployed", "y3_log_wage", "y4_hours", "y5_poor",
           "wage_real", "wfh", "selfemp", "commute_min")
 
@@ -119,6 +121,31 @@ make_x <- function(dt) {
   dt[, marital := factor(MAR, levels = 1:5,
                          labels = c("married", "widowed", "divorced", "separated", "never_married"))]
   dt[, state  := factor(ST)]
+
+  # --- extra features (group B in docs/VARIABLES.md) ---
+  # years since entry to the US; 0 = no entry year (born in the US states)
+  dt[, years_in_us := fifelse(!is.na(YOEP), as.integer(pmax(year - YOEP, 0)), 0L)]
+
+  # world area of birth
+  dt[, birth_region := factor(WAOB, levels = 1:8,
+                              labels = c("us", "pr_island_areas", "latin_america", "asia",
+                                         "europe", "africa", "northern_america", "oceania"))]
+
+  # bachelor's degree in science / engineering (0 also for people without a bachelor's degree)
+  dt[, stem_degree := as.integer(!is.na(SCIENGP) & SCIENGP == 1)]
+
+  # field of bachelor's degree (~170 codes); "no_ba" = no bachelor's degree
+  dt[, degree_field := factor(fifelse(is.na(FOD1P), "no_ba", as.character(FOD1P)))]
+
+  # own children (asked only for women): age of children; men and women without an answer -> own category
+  dt[, children := fcase(SEX == 1,     "male",
+                         is.na(PAOC),  "female_na",
+                         PAOC == 1,    "under6",
+                         PAOC == 2,    "age6_17",
+                         PAOC == 3,    "under6_and_6_17",
+                         PAOC == 4,    "none")]
+  dt[, children := factor(children, levels = c("none", "under6", "age6_17", "under6_and_6_17",
+                                               "female_na", "male"))]
   # Census region from state code (REGION column is missing in the 2016 person file)
   dt[, region := fcase(ST %in% c(9, 23, 25, 33, 34, 36, 42, 44, 50),                  "northeast",
                        ST %in% c(17, 18, 19, 20, 26, 27, 29, 31, 38, 39, 46, 55),       "midwest",
@@ -200,6 +227,10 @@ check_year <- function(dt, rows_raw, year) {
     n_y5        = sum(!is.na(dt$y5_poor)),
     na_educ     = sum(is.na(dt$educ)),
     na_region   = sum(is.na(dt$region)),
+    na_birth_region = sum(is.na(dt$birth_region)),
+    na_children = sum(is.na(dt$children)),
+    n_fields    = uniqueN(dt$degree_field),
+    share_stem  = round(mean(dt$stem_degree), 3),
     na_marital  = sum(is.na(dt$marital))
   )
 }

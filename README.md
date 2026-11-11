@@ -15,6 +15,7 @@ Topic and data: see `docs/IDEAS.md` and `docs/DATA.md`.
 | `docs/WORKLOG.md` | report of work done (newest on top) |
 | `docs/IDEAS.md` | ideas, decisions and open questions |
 | `docs/AI_USAGE.md` | log of AI use (required by the syllabus) |
+| `docs/VARIABLES.md` | which ACS variables we use, could use, and drop — and why |
 | `docs/DATA.md` | data structure: tables, keys, pitfalls, sample sizes |
 | `code/` | analysis scripts (numbered by step) |
 | `outputs/` | tables and figures produced by the code |
