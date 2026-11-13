@@ -28,22 +28,26 @@ FACTORS <- c("educ", "race", "marital", "state", "birth_region", "degree_field",
 # Classification outcomes (0/1); the others are regression
 CLASSIFICATION <- c("y1_employed", "y2_unemployed", "y5_poor")
 
+# Race (RAC1P) is NOT used: Census changed race coding in 2020, so the same person can get
+# a different race in 2019 and 2022 -> it would distort the counterfactual.
+# Checked in 04_robustness_y5.R (decision D15, docs/IDEAS.md). Hispanic origin is kept.
+
 # All candidate features: main effects + age^2 + interactions -> lasso chooses among them
-FORMULA_FULL <- ~ age + I(age^2) + female + educ + race + hispanic + foreign_born + citizen +
+FORMULA_FULL <- ~ age + I(age^2) + female + educ + hispanic + foreign_born + citizen +
   marital + state + years_in_us + birth_region + stem_degree + degree_field + children +
-  educ:female + educ:race + age:educ
+  educ:female + age:educ
 
 # Same, but age enters through a natural spline (regression only)
-FORMULA_SPLINE <- ~ ns(age, df = 5) + female + educ + race + hispanic + foreign_born + citizen +
+FORMULA_SPLINE <- ~ ns(age, df = 5) + female + educ + hispanic + foreign_born + citizen +
   marital + state + years_in_us + birth_region + stem_degree + degree_field + children +
-  educ:female + educ:race
+  educ:female
 
 # Main effects only - for trees (they find interactions themselves)
-FORMULA_TREE <- ~ age + female + educ + race + hispanic + foreign_born + citizen + marital +
+FORMULA_TREE <- ~ age + female + educ + hispanic + foreign_born + citizen + marital +
   state + years_in_us + birth_region + stem_degree + degree_field + children
 
 # Small set for LDA and KNN: they cannot handle hundreds of rare dummies
-FORMULA_SMALL <- ~ age + female + educ + race + hispanic + foreign_born + citizen + marital +
+FORMULA_SMALL <- ~ age + female + educ + hispanic + foreign_born + citizen + marital +
   years_in_us + birth_region + stem_degree + children
 
 with_y <- function(formula, y) update(formula, as.formula(paste(y, "~ .")))
@@ -255,7 +259,7 @@ add_groups <- function(dt) {
   invisible(dt)
 }
 
-GROUP_VARS <- c("all", "age_group", "educ", "sex", "race", "hispanic_origin", "region")
+GROUP_VARS <- c("all", "age_group", "educ", "sex", "hispanic_origin", "region")   # no race: not comparable between years
 
 gap_table <- function(target, y) {
   add_groups(target)
