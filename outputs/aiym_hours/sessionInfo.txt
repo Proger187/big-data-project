@@ -1,0 +1,32 @@
+R version 4.5.1 (2025-06-13 ucrt)
+Platform: x86_64-w64-mingw32/x64
+Running under: Windows 11 x64 (build 26200)
+
+Matrix products: default
+  LAPACK version 3.12.1
+
+locale:
+[1] LC_COLLATE=Russian_Russia.utf8 
+[2] LC_CTYPE=Russian_Russia.utf8   
+[3] LC_MONETARY=Russian_Russia.utf8
+[4] LC_NUMERIC=C                   
+[5] LC_TIME=Russian_Russia.utf8    
+
+time zone: Asia/Qyzylorda
+tzcode source: internal
+
+attached base packages:
+[1] stats     graphics  grDevices utils    
+[5] datasets  methods   base     
+
+other attached packages:
+[1] data.table_1.18.6.1
+
+loaded via a namespace (and not attached):
+ [1] compiler_4.5.1   Matrix_1.7-3    
+ [3] tools_4.5.1      survival_3.8-3  
+ [5] Rcpp_1.1.1       rpart_4.1.24    
+ [7] splines_4.5.1    codetools_0.2-20
+ [9] grid_4.5.1       iterators_1.0.14
+[11] foreach_1.5.2    shape_1.4.6.1   
+[13] glmnet_5.2       lattice_0.22-7  

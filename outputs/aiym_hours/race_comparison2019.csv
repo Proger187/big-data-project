@@ -1,0 +1,3 @@
+specification,model,parameter,cv_MSE,reduction_percent_vs_without_race,cv_RMSE
+Without race,Tree,5e-05,120.935186929475,0,10.9970535567249
+With race,Tree,5e-05,120.876139708085,0.0488255096711687,10.9943685452183

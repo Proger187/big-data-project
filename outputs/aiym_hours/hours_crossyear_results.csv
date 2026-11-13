@@ -1,0 +1,3 @@
+training_year,target_year,target_rows,model,parameter,actual_mean_hours,predicted_mean_hours,actual_minus_predicted
+2016,2019,1228838,Tree,5e-05,40.809791076261,40.8419064508231,-0.0321153745621407
+2019,2022,1251235,Tree,5e-05,40.7551872320033,40.8547563476912,-0.0995691156878818
