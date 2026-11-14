@@ -311,6 +311,12 @@ run_pair <- function(train_year, target_year, y, out_dir) {
 
   # 3. Predict the target year with the best model and compare with reality
   target[, pred := predict_in_chunks(models[[best]]$predict, target)]
+  # person-level predictions are saved for the cluster analysis (05_clusters_types.R);
+  # data/ is not in git, files are ~20 MB each
+  pred_dir <- "data/processed/predictions"
+  dir.create(pred_dir, showWarnings = FALSE, recursive = TRUE)
+  saveRDS(target[, .(SERIALNO, SPORDER, pred)],
+          file.path(pred_dir, sprintf("%s_%d_from_%d.rds", y, target_year, train_year)))
   gaps <- gap_table(target, y)
   fwrite(gaps, file.path(out_dir, sprintf("gaps_%d_to_%d.csv", train_year, target_year)))
   cat(sprintf("\nActual vs predicted in %d (model trained on %d):\n", target_year, train_year))
