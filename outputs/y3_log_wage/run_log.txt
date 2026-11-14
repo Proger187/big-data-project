@@ -1,0 +1,188 @@
+Outcome: y3_log_wage 
+Started: 2026-11-14 15:59:47 
+
+================================================================
+y3_log_wage: train on 2016, predict 2019   (2026-11-14 15:59:47)
+================================================================
+Rows: train sample 100000, test sample 50000, target year 1163429
+  fitted: ols ( - )
+  fitted: lasso ( lambda.1se = 0.00263 (lambda.min = 0.00008) )
+  fitted: ridge ( lambda.1se = 0.25666 (lambda.min = 0.02508) )
+  fitted: spline_ols ( ns(age, df = 5) )
+  fitted: tree ( cp = 0.00050, 43 leaves )
+
+Model comparison on the test set (2016):
+Индекс(ы): <used_for_counterfactual>
+        model                                      tuning n_test mean_actual mean_predicted  test_mse
+       <char>                                      <char>  <int>       <num>          <num>     <num>
+1:        ols                                           -  50000    10.77357       10.77109 0.6967822
+2: spline_ols                             ns(age, df = 5)  50000    10.77357       10.77122 0.6968530
+3:      lasso lambda.1se = 0.00263 (lambda.min = 0.00008)  50000    10.77357       10.77081 0.7016055
+4:      ridge lambda.1se = 0.25666 (lambda.min = 0.02508)  50000    10.77357       10.77036 0.7112081
+5:       tree                     cp = 0.00050, 43 leaves  50000    10.77357       10.76976 0.7153874
+          r2 used_for_counterfactual
+       <num>                  <lgcl>
+1: 0.2514822                    TRUE
+2: 0.2514061                    TRUE
+3: 0.2463009                    TRUE
+4: 0.2359853                    TRUE
+5: 0.2314956                    TRUE
+
+Best model: ols 
+
+Lasso kept 165 of 211 candidate features (lambda.1se). Top 15 by |coef|:
+              feature       coef
+               <char>      <num>
+ 1: childrenfemale_na -0.7890091
+ 2:          educgrad  0.4774929
+ 3:  degree_field6108  0.4420270
+ 4:  degree_field4901 -0.3862188
+ 5:            female -0.3806204
+ 6:  degree_field6207  0.3120078
+ 7:  degree_field6107  0.3027818
+ 8:  degree_field6212  0.2990023
+ 9:  degree_field2407  0.2931543
+10:         educlt_hs -0.2873040
+11:  degree_field2405  0.2726095
+12:           state11  0.2719545
+13:            educba  0.2713345
+14:  degree_field2412  0.2643350
+15:  degree_field1105 -0.2642167
+
+Actual vs predicted in 2019 (model trained on 2016):
+          group_var        group       n   actual predicted        gap
+             <char>       <char>   <int>    <num>     <num>      <num>
+ 1:             all          all 1163429 10.78140  10.74161 0.03978350
+ 2:       age_group        25-34  295058 10.56973  10.51049 0.05923584
+ 3:       age_group        35-44  284595 10.84188  10.79743 0.04445112
+ 4:       age_group        45-54  297417 10.91114  10.89271 0.01842821
+ 5:       age_group        55-64  286359 10.84459  10.81228 0.03230412
+ 6:            educ some_college  345221 10.64078  10.60181 0.03897745
+ 7:            educ        lt_hs   74192 10.26120  10.17337 0.08782682
+ 8:            educ           hs  257365 10.48166  10.42222 0.05943763
+ 9:            educ           ba  294881 11.04353  11.02399 0.01954270
+10:            educ         grad  191770 11.35376  11.33371 0.02005054
+11:             sex         male  601445 10.95125  10.91805 0.03320075
+12:             sex       female  561984 10.59495  10.54794 0.04700912
+13: hispanic_origin not_hispanic 1003764 10.83293  10.79535 0.03757359
+14: hispanic_origin     hispanic  159665 10.53725  10.48700 0.05025375
+15:          region        south  424031 10.71630  10.69691 0.01938189
+16:          region         west  274423 10.82126  10.77088 0.05038091
+17:          region    northeast  213529 10.89369  10.84348 0.05020817
+18:          region      midwest  251446 10.75608  10.70122 0.05486612
+
+Residual tree (2019):
+n= 200000 
+
+node), split, n, deviance, yval
+      * denotes terminal node
+
+1) root 200000 143541.20  0.02494403  
+  2) degree_field=6203,5200,6107,3600,3301,1901,6206,5301,5501,2414,1902,2100,6002,2901,2314,4901,6212,5007,6209,6108,6102,2313,2307,5502,6211,2399,6001,3601,6105,2412,6100,5505,2312,6005,5500,2105,5403,1100,3608,6210,6199,2499,4000,6006,2601,2106,2603,5401,3604,6003 38845  29804.48 -0.03089457 *
+  3) degree_field=no_ba,6200,6201,2304,2300,2102,5506,6207,6402,2408,5507,3401,3700,5003,6000,4101,6004,5404,2400,2406,5098,1401,6109,4801,2407,2405,2602,2306,1903,2310,2309,1904,1501,5004,1301,6103,5901,5504,1103,2311,3606,1303,6110,1105,2305,2502,6299,1101,3609,4001,5601,4002,2401,6204,2599,5503,6205,3603,6007,6104,4007,2107,2503,2308,1302,3202,3302,6106,other 161155 113586.40  0.03840344 *
+
+================================================================
+y3_log_wage: train on 2019, predict 2022   (2026-11-14 16:00:30)
+================================================================
+Rows: train sample 100000, test sample 50000, target year 1183706
+  fitted: ols ( - )
+  fitted: lasso ( lambda.1se = 0.00337 (lambda.min = 0.00012) )
+  fitted: ridge ( lambda.1se = 0.14237 (lambda.min = 0.02431) )
+  fitted: spline_ols ( ns(age, df = 5) )
+  fitted: tree ( cp = 0.00051, 40 leaves )
+
+Model comparison on the test set (2019):
+Индекс(ы): <used_for_counterfactual>
+        model                                      tuning n_test mean_actual mean_predicted  test_mse
+       <char>                                      <char>  <int>       <num>          <num>     <num>
+1:        ols                                           -  50000    10.81834       10.82032 0.6947045
+2: spline_ols                             ns(age, df = 5)  50000    10.81834       10.82056 0.6950480
+3:      lasso lambda.1se = 0.00337 (lambda.min = 0.00012)  50000    10.81834       10.82040 0.7025470
+4:      ridge lambda.1se = 0.14237 (lambda.min = 0.02431)  50000    10.81834       10.82032 0.7054502
+5:       tree                     cp = 0.00051, 40 leaves  50000    10.81834       10.82098 0.7111328
+          r2 used_for_counterfactual
+       <num>                  <lgcl>
+1: 0.2459443                    TRUE
+2: 0.2455715                    TRUE
+3: 0.2374317                    TRUE
+4: 0.2342806                    TRUE
+5: 0.2281124                    TRUE
+
+Best model: ols 
+
+Lasso kept 165 of 215 candidate features (lambda.1se). Top 15 by |coef|:
+                 feature       coef
+                  <char>      <num>
+ 1:    childrenfemale_na -0.8839157
+ 2:             educgrad  0.4899443
+ 3:     degree_field4901 -0.3877916
+ 4:               female -0.3852337
+ 5:     degree_field6106  0.3813325
+ 6:              state11  0.3483293
+ 7:     degree_field6207  0.3350173
+ 8:     degree_field4007 -0.3245842
+ 9:     degree_field2407  0.3063319
+10:     degree_field6002 -0.2985866
+11:               educba  0.2787563
+12:     degree_field6108  0.2784527
+13:     degree_field6205  0.2752314
+14:     degree_field5601  0.2652483
+15: maritalnever_married -0.2598158
+
+Actual vs predicted in 2022 (model trained on 2019):
+          group_var        group       n   actual predicted           gap
+             <char>       <char>   <int>    <num>     <num>         <num>
+ 1:             all          all 1183706 10.80502  10.80033  0.0046919021
+ 2:       age_group        45-54  294659 10.92930  10.93968 -0.0103756621
+ 3:       age_group        55-64  281433 10.84402  10.84421 -0.0001945308
+ 4:       age_group        35-44  303956 10.86421  10.86112  0.0030900789
+ 5:       age_group        25-34  303658 10.61262  10.58984  0.0227772242
+ 6:            educ           hs  253209 10.47560  10.47150  0.0040998160
+ 7:            educ        lt_hs   72739 10.27431  10.24580  0.0285071902
+ 8:            educ some_college  330763 10.65033  10.64562  0.0047123138
+ 9:            educ         grad  212091 11.33304  11.34114 -0.0080991594
+10:            educ           ba  314904 11.05926  11.05226  0.0070070029
+11:             sex         male  611836 10.96300  10.98200 -0.0190001649
+12:             sex       female  571870 10.62786  10.59660  0.0312608311
+13: hispanic_origin not_hispanic 1003119 10.85826  10.85235  0.0059114275
+14: hispanic_origin     hispanic  180587 10.56539  10.56618 -0.0007971808
+15:          region        south  438312 10.74609  10.74542  0.0006685958
+16:          region         west  281546 10.85374  10.84144  0.0122931161
+17:          region    northeast  213865 10.90131  10.90632 -0.0050077502
+18:          region      midwest  249983 10.77449  10.76294  0.0115478708
+
+Residual tree has no splits: the gap is about the same for all groups.
+
+Residual tree (2022):
+n= 200000 
+
+node), split, n, deviance, yval
+      * denotes terminal node
+
+1) root 200000 146263.2 -0.005325394 *
+
+================================================================
+FINAL: excess gap = (actual 2022 - predicted 2022) - (actual 2019 - predicted 2019)
+================================================================
+          group_var        group actual_2019 actual_2022   gap_norm     gap_covid  gap_excess
+             <char>       <char>       <num>       <num>      <num>         <num>       <num>
+ 1:             all          all    10.78140    10.80502 0.03978350  0.0046919021 -0.03509160
+ 2:       age_group        25-34    10.56973    10.61262 0.05923584  0.0227772242 -0.03645862
+ 3:       age_group        35-44    10.84188    10.86421 0.04445112  0.0030900789 -0.04136104
+ 4:       age_group        45-54    10.91114    10.92930 0.01842821 -0.0103756621 -0.02880387
+ 5:       age_group        55-64    10.84459    10.84402 0.03230412 -0.0001945308 -0.03249865
+ 6:            educ some_college    10.64078    10.65033 0.03897745  0.0047123138 -0.03426514
+ 7:            educ        lt_hs    10.26120    10.27431 0.08782682  0.0285071902 -0.05931963
+ 8:            educ           hs    10.48166    10.47560 0.05943763  0.0040998160 -0.05533781
+ 9:            educ           ba    11.04353    11.05926 0.01954270  0.0070070029 -0.01253570
+10:            educ         grad    11.35376    11.33304 0.02005054 -0.0080991594 -0.02814970
+11:             sex         male    10.95125    10.96300 0.03320075 -0.0190001649 -0.05220091
+12:             sex       female    10.59495    10.62786 0.04700912  0.0312608311 -0.01574829
+13: hispanic_origin not_hispanic    10.83293    10.85826 0.03757359  0.0059114275 -0.03166217
+14: hispanic_origin     hispanic    10.53725    10.56539 0.05025375 -0.0007971808 -0.05105093
+15:          region        south    10.71630    10.74609 0.01938189  0.0006685958 -0.01871329
+16:          region         west    10.82126    10.85374 0.05038091  0.0122931161 -0.03808779
+17:          region    northeast    10.89369    10.90131 0.05020817 -0.0050077502 -0.05521592
+18:          region      midwest    10.75608    10.77449 0.05486612  0.0115478708 -0.04331825
+
+Finished: 2026-11-14 16:01:07 

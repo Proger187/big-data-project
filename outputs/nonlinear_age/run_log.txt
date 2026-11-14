@@ -1,0 +1,301 @@
+
+> summary_rows <- list()
+
+> for (y in Y_TO_RUN) {
++   tryCatch({
++     is_class <- y %in% CLASSIFICATION
++     metric   <- if (is_class) "AUC (higher = better)" else "MSE (lowe ..." ... [TRUNCATED] 
+
+================================================================
+y1_employed - cross-validation of age shapes, AUC (higher = better)    2026-11-14 16:26:55 
+================================================================
+
+CV score by shape (average of 2016 and 2019, best first):
+           shape cv_score
+          <char>    <num>
+ 1: polynomial_4  0.72159
+ 2:     spline_5  0.72158
+ 3:     spline_6  0.72155
+ 4:     spline_7  0.72153
+ 5:     spline_8  0.72152
+ 6: polynomial_3  0.72145
+ 7:     spline_4  0.72144
+ 8:     spline_3  0.72116
+ 9:       step_8  0.71958
+10: polynomial_2  0.71952
+11:       step_6  0.71854
+12:       step_4  0.71644
+13: polynomial_1  0.71210
+
+Chosen shape: poly(age, 4) 
+
+Test-set comparison with the main model (same samples as 03_run_models.R):
+   train_year                model test_score
+        <num>               <char>      <num>
+1:       2016    main: age + age^2  0.7174393
+2:       2016 chosen: poly(age, 4)  0.7197664
+3:       2019    main: age + age^2  0.7225272
+4:       2019 chosen: poly(age, 4)  0.7237918
+
+Excess gap with the chosen shape (gap_excess) vs the main run (gap_excess_main):
+          group_var        group    gap_norm   gap_covid   gap_excess gap_excess_main
+             <char>       <char>       <num>       <num>        <num>           <num>
+ 1:             all          all 0.022629752 0.011296518 -0.011333234    -0.011448311
+ 2:       age_group        35-44 0.023212029 0.011389987 -0.011822042    -0.010691292
+ 3:       age_group        55-64 0.022587195 0.009960273 -0.012626922    -0.013135665
+ 4:       age_group        45-54 0.016841758 0.011280975 -0.005560783    -0.005275581
+ 5:       age_group        25-34 0.027312741 0.012464583 -0.014848158    -0.015301519
+ 6:            educ        lt_hs 0.043128966 0.033239742 -0.009889224    -0.009650003
+ 7:            educ           hs 0.031457391 0.017213726 -0.014243665    -0.014436297
+ 8:            educ           ba 0.009944580 0.004579283 -0.005365297    -0.005351426
+ 9:            educ some_college 0.022583452 0.006593477 -0.015989975    -0.016415391
+10:            educ         grad 0.009940207 0.006183039 -0.003757169    -0.003687420
+11:             sex         male 0.027710625 0.017447416 -0.010263210    -0.010313542
+12:             sex       female 0.017641930 0.005106483 -0.012535447    -0.012715835
+13: hispanic_origin not_hispanic 0.021732402 0.010839138 -0.010893265    -0.011064292
+14: hispanic_origin     hispanic 0.026789868 0.013287495 -0.013502372    -0.013388667
+15:          region        south 0.025342739 0.016714540 -0.008628199    -0.008770635
+16:          region         west 0.027466225 0.008099389 -0.019366836    -0.019268888
+17:          region    northeast 0.014898417 0.006773618 -0.008124799    -0.008270331
+18:          region      midwest 0.018438407 0.008669692 -0.009768715    -0.010055944
+
+================================================================
+y2_unemployed - cross-validation of age shapes, AUC (higher = better)    2026-11-14 16:33:08 
+================================================================
+
+CV score by shape (average of 2016 and 2019, best first):
+           shape cv_score
+          <char>    <num>
+ 1: polynomial_2  0.66778
+ 2: polynomial_1  0.66774
+ 3:       step_6  0.66760
+ 4:       step_4  0.66757
+ 5:     spline_3  0.66748
+ 6: polynomial_3  0.66748
+ 7:     spline_4  0.66744
+ 8: polynomial_4  0.66741
+ 9:     spline_5  0.66736
+10:     spline_6  0.66726
+11:     spline_7  0.66686
+12:       step_8  0.66673
+13:     spline_8  0.66634
+
+Chosen shape: poly(age, 2) 
+
+Test-set comparison with the main model (same samples as 03_run_models.R):
+   train_year                model test_score
+        <num>               <char>      <num>
+1:       2016    main: age + age^2  0.6627266
+2:       2016 chosen: poly(age, 2)  0.6627266
+3:       2019    main: age + age^2  0.6736173
+4:       2019 chosen: poly(age, 2)  0.6736173
+
+Excess gap with the chosen shape (gap_excess) vs the main run (gap_excess_main):
+          group_var        group     gap_norm     gap_covid   gap_excess gap_excess_main
+             <char>       <char>        <num>         <num>        <num>           <num>
+ 1:             all          all -0.008951206 -8.856990e-04  0.008065507     0.008065507
+ 2:       age_group        25-34 -0.010598637 -6.046431e-04  0.009993994     0.009993994
+ 3:       age_group        35-44 -0.008492908 -1.954904e-04  0.008297418     0.008297418
+ 4:       age_group        45-54 -0.006804773 -1.264438e-03  0.005540335     0.005540335
+ 5:       age_group        55-64 -0.009828723 -1.730303e-03  0.008098420     0.008098420
+ 6:            educ some_college -0.007819613  1.819621e-03  0.009639234     0.009639234
+ 7:            educ        lt_hs -0.018064806 -6.553893e-03  0.011510913     0.011510913
+ 8:            educ           hs -0.015716442 -8.112506e-04  0.014905191     0.014905191
+ 9:            educ           ba -0.004711965 -6.158534e-04  0.004096111     0.004096111
+10:            educ         grad -0.002090308 -3.531783e-03 -0.001441475    -0.001441475
+11:             sex         male -0.009835195 -2.171929e-03  0.007663267     0.007663267
+12:             sex       female -0.007968285  5.725922e-04  0.008540877     0.008540877
+13: hispanic_origin not_hispanic -0.007820576 -1.105983e-03  0.006714593     0.006714593
+14: hispanic_origin     hispanic -0.014196950  7.835921e-05  0.014275310     0.014275310
+15:          region        south -0.008520313 -4.258333e-03  0.004261979     0.004261979
+16:          region         west -0.012754799  1.551442e-03  0.014306241     0.014306241
+17:          region    northeast -0.007585932  1.507176e-03  0.009093108     0.009093108
+18:          region      midwest -0.006486154  4.098728e-04  0.006896027     0.006896027
+
+================================================================
+y3_log_wage - cross-validation of age shapes, MSE (lower = better)    2026-11-14 16:52:32 
+================================================================
+
+CV score by shape (average of 2016 and 2019, best first):
+           shape cv_score
+          <char>    <num>
+ 1: polynomial_2  0.70305
+ 2: polynomial_4  0.70309
+ 3: polynomial_3  0.70310
+ 4:     spline_6  0.70312
+ 5:     spline_5  0.70314
+ 6:     spline_4  0.70316
+ 7:     spline_7  0.70317
+ 8:     spline_8  0.70320
+ 9:     spline_3  0.70321
+10:       step_8  0.70422
+11:       step_6  0.70533
+12:       step_4  0.70585
+13: polynomial_1  0.71088
+
+Chosen shape: poly(age, 2) 
+
+Test-set comparison with the main model (same samples as 03_run_models.R):
+   train_year                model test_score
+        <num>               <char>      <num>
+1:       2016    main: age + age^2  0.6967822
+2:       2016 chosen: poly(age, 2)  0.6967822
+3:       2019    main: age + age^2  0.6947045
+4:       2019 chosen: poly(age, 2)  0.6947045
+
+Excess gap with the chosen shape (gap_excess) vs the main run (gap_excess_main):
+          group_var        group   gap_norm     gap_covid  gap_excess gap_excess_main
+             <char>       <char>      <num>         <num>       <num>           <num>
+ 1:             all          all 0.03978350  0.0046919021 -0.03509160     -0.03509160
+ 2:       age_group        25-34 0.05923584  0.0227772242 -0.03645862     -0.03645862
+ 3:       age_group        35-44 0.04445112  0.0030900789 -0.04136104     -0.04136104
+ 4:       age_group        45-54 0.01842821 -0.0103756621 -0.02880387     -0.02880387
+ 5:       age_group        55-64 0.03230412 -0.0001945308 -0.03249865     -0.03249865
+ 6:            educ some_college 0.03897745  0.0047123138 -0.03426514     -0.03426514
+ 7:            educ        lt_hs 0.08782682  0.0285071902 -0.05931963     -0.05931963
+ 8:            educ           hs 0.05943763  0.0040998160 -0.05533781     -0.05533781
+ 9:            educ           ba 0.01954270  0.0070070029 -0.01253570     -0.01253570
+10:            educ         grad 0.02005054 -0.0080991594 -0.02814970     -0.02814970
+11:             sex         male 0.03320075 -0.0190001649 -0.05220091     -0.05220091
+12:             sex       female 0.04700912  0.0312608311 -0.01574829     -0.01574829
+13: hispanic_origin not_hispanic 0.03757359  0.0059114275 -0.03166217     -0.03166217
+14: hispanic_origin     hispanic 0.05025375 -0.0007971808 -0.05105093     -0.05105093
+15:          region        south 0.01938189  0.0006685958 -0.01871329     -0.01871329
+16:          region         west 0.05038091  0.0122931161 -0.03808779     -0.03808779
+17:          region    northeast 0.05020817 -0.0050077502 -0.05521592     -0.05521592
+18:          region      midwest 0.05486612  0.0115478708 -0.04331825     -0.04331825
+
+================================================================
+y4_hours - cross-validation of age shapes, MSE (lower = better)    2026-11-14 16:54:36 
+================================================================
+
+CV score by shape (average of 2016 and 2019, best first):
+           shape cv_score
+          <char>    <num>
+ 1: polynomial_4 120.1966
+ 2:     spline_8 120.2071
+ 3:     spline_7 120.2106
+ 4:     spline_6 120.2135
+ 5:     spline_4 120.2161
+ 6:     spline_5 120.2164
+ 7: polynomial_3 120.2359
+ 8: polynomial_2 120.2489
+ 9:     spline_3 120.2547
+10:       step_8 120.3442
+11:       step_6 120.3844
+12:       step_4 120.4505
+13: polynomial_1 120.6799
+
+Chosen shape: poly(age, 4) 
+
+Test-set comparison with the main model (same samples as 03_run_models.R):
+   train_year                model test_score
+        <num>               <char>      <num>
+1:       2016    main: age + age^2   117.4167
+2:       2016 chosen: poly(age, 4)   117.3797
+3:       2019    main: age + age^2   120.7372
+4:       2019 chosen: poly(age, 4)   120.6700
+
+Excess gap with the chosen shape (gap_excess) vs the main run (gap_excess_main):
+          group_var        group      gap_norm   gap_covid   gap_excess gap_excess_main
+             <char>       <char>         <num>       <num>        <num>           <num>
+ 1:             all          all -0.0181196189 -0.08366686 -0.065547237    -0.065367989
+ 2:       age_group        25-34 -0.0187248013 -0.03084674 -0.012121942    -0.051488364
+ 3:       age_group        35-44 -0.0485257076 -0.16911557 -0.120589862     0.003736538
+ 4:       age_group        45-54 -0.0450349712 -0.14645708 -0.101422107    -0.234005293
+ 5:       age_group        55-64  0.0525280351  0.03234344 -0.020184592     0.033415186
+ 6:            educ some_college  0.1975181281  0.11280684 -0.084711284    -0.095505498
+ 7:            educ        lt_hs  0.3695821546 -0.12967775 -0.499259909    -0.492337867
+ 8:            educ           hs  0.1834055504 -0.07239725 -0.255802800    -0.243744528
+ 9:            educ           ba -0.1986763865 -0.06347397  0.135202420     0.139073244
+10:            educ         grad -0.6817362034 -0.45063591  0.231100293     0.219948581
+11:             sex         male -0.1790430069 -0.48856639 -0.309523386    -0.309332504
+12:             sex       female  0.1609222947  0.37610934  0.215187043     0.215351511
+13: hispanic_origin not_hispanic -0.0286830081 -0.07441958 -0.045736567    -0.044996536
+14: hispanic_origin     hispanic  0.0310579850 -0.12441293 -0.155470913    -0.157763648
+15:          region        south -0.0334059808 -0.02722523  0.006180752     0.008097815
+16:          region         west  0.0113467924 -0.06840784 -0.079754637    -0.081162080
+17:          region    northeast  0.0009726475 -0.08487173 -0.085844377    -0.089574792
+18:          region      midwest -0.0410267224 -0.20344276 -0.162416038    -0.160219347
+
+================================================================
+y5_poor - cross-validation of age shapes, AUC (higher = better)    2026-11-14 16:56:49 
+================================================================
+
+CV score by shape (average of 2016 and 2019, best first):
+           shape cv_score
+          <char>    <num>
+ 1:       step_8  0.76808
+ 2: polynomial_2  0.76757
+ 3: polynomial_3  0.76754
+ 4:     spline_3  0.76754
+ 5:       step_6  0.76753
+ 6:     spline_4  0.76753
+ 7: polynomial_4  0.76749
+ 8:     spline_5  0.76741
+ 9:     spline_6  0.76741
+10:     spline_7  0.76739
+11: polynomial_1  0.76738
+12:     spline_8  0.76736
+13:       step_4  0.76730
+
+Chosen shape: cut(age, breaks = c(17, 23, 29, 35, 40, 46, 52, 58, 64)) 
+
+Test-set comparison with the main model (same samples as 03_run_models.R):
+   train_year                                                            model test_score
+        <num>                                                           <char>      <num>
+1:       2016                                                main: age + age^2  0.7688572
+2:       2016 chosen: cut(age, breaks = c(17, 23, 29, 35, 40, 46, 52, 58, 64))  0.7692789
+3:       2019                                                main: age + age^2  0.7675115
+4:       2019 chosen: cut(age, breaks = c(17, 23, 29, 35, 40, 46, 52, 58, 64))  0.7679418
+
+Excess gap with the chosen shape (gap_excess) vs the main run (gap_excess_main):
+          group_var        group     gap_norm     gap_covid  gap_excess gap_excess_main
+             <char>       <char>        <num>         <num>       <num>           <num>
+ 1:             all          all -0.016683004  2.646386e-03 0.019329390     0.019428787
+ 2:       age_group        35-44 -0.015904572  5.002282e-03 0.020906855     0.024180593
+ 3:       age_group        25-34 -0.028143325 -4.695533e-03 0.023447792     0.020418615
+ 4:       age_group        55-64 -0.008305912  9.339771e-03 0.017645684     0.016830424
+ 5:       age_group        45-54 -0.013106198  4.611793e-03 0.017717991     0.017680058
+ 6:       age_group        18-24 -0.017288898 -2.137015e-03 0.015151883     0.016824841
+ 7:            educ        lt_hs -0.035122858 -2.166753e-03 0.032956105     0.033036180
+ 8:            educ           hs -0.021681040  2.647480e-03 0.024328520     0.024443657
+ 9:            educ some_college -0.016714724  4.229608e-03 0.020944332     0.021068411
+10:            educ           ba -0.006622299  3.444753e-03 0.010067052     0.010150573
+11:            educ         grad -0.005992694  1.350131e-03 0.007342825     0.007403226
+12:             sex         male -0.018224765 -1.098480e-03 0.017126285     0.017261745
+13:             sex       female -0.015182214  6.386695e-03 0.021568910     0.021632363
+14: hispanic_origin not_hispanic -0.013109824  3.277951e-03 0.016387775     0.016458955
+15: hispanic_origin     hispanic -0.032336285  5.439298e-05 0.032390678     0.032611741
+16:          region        south -0.021257948 -9.749069e-04 0.020283041     0.020402308
+17:          region         west -0.021458127 -1.366893e-03 0.020091233     0.020160080
+18:          region    northeast -0.008506983  8.673941e-03 0.017180924     0.017343815
+19:          region      midwest -0.009439799  9.135710e-03 0.018575509     0.018621008
+
+> if (length(summary_rows)) {
++   summ <- rbindlist(summary_rows)
++   fwrite(summ, file.path(OUT_DIR, "summary.csv"))
++   cat("\n===================== ..." ... [TRUNCATED] 
+
+================================================================
+SUMMARY
+         outcome                                             chosen_shape test_main_2019 test_chosen_2019
+          <char>                                                   <char>          <num>            <num>
+1:   y1_employed                                             poly(age, 4)      0.7225272        0.7237918
+2: y2_unemployed                                             poly(age, 2)      0.6736173        0.6736173
+3:   y3_log_wage                                             poly(age, 2)      0.6947045        0.6947045
+4:      y4_hours                                             poly(age, 4)    120.7371692      120.6699801
+5:       y5_poor cut(age, breaks = c(17, 23, 29, 35, 40, 46, 52, 58, 64))      0.7675115        0.7679418
+   excess_chosen  excess_main
+           <num>        <num>
+1:  -0.011333234 -0.011448311
+2:   0.008065507  0.008065507
+3:  -0.035091600 -0.035091600
+4:  -0.065547237 -0.065367989
+5:   0.019329390  0.019428787
+
+> cat("\nFinished:", format(Sys.time()), "\n")
+
+Finished: 2026-11-14 17:06:11 
+
+> sink()

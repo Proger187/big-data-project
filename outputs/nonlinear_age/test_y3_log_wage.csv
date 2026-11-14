@@ -1,0 +1,5 @@
+train_year,model,test_score
+2016,main: age + age^2,0.696782199128514
+2016,"chosen: poly(age, 2)",0.696782199128508
+2019,main: age + age^2,0.694704450497127
+2019,"chosen: poly(age, 2)",0.694704450497132
