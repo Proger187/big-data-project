@@ -1,0 +1,360 @@
+Robustness check for y5_poor 
+Started: 2026-11-14 19:21:07 
+
+
+############## Variant: with_race ##############
+Features: ~age + I(age^2) + female + educ + hispanic + foreign_born + citizen + marital + state + years_in_us + birth_region + stem_degree + degree_field + children + race + female:educ + age:educ + educ:race 
+
+================================================================
+y5_poor: train on 2016, predict 2019   (2026-11-14 19:21:07)
+================================================================
+Rows: train sample 100000, test sample 50000, target year 1830521
+  fitted: logit ( - )
+  fitted: lasso ( lambda.1se = 0.00173 (lambda.min = 0.00052) )
+  fitted: ridge ( lambda.1se = 0.02401 (lambda.min = 0.00542) )
+  fitted: lda ( small feature set, 30 columns )
+  fitted: knn ( k = 50 (validation error 0.119 / 0.1187 / 0.1192) )
+  fitted: tree ( cp = 0.00138, 4 leaves )
+
+Model comparison on the test set (2016):
+   model                                            tuning n_test mean_actual
+1: logit                                                 -  50000     0.12352
+2: lasso       lambda.1se = 0.00173 (lambda.min = 0.00052)  50000     0.12352
+3: ridge       lambda.1se = 0.02401 (lambda.min = 0.00542)  50000     0.12352
+4:   lda                     small feature set, 30 columns  50000     0.12352
+5:   knn k = 50 (validation error 0.119 / 0.1187 / 0.1192)  10000     0.11760
+6:  tree                            cp = 0.00138, 4 leaves  50000     0.12352
+   mean_predicted test_error       auc used_for_counterfactual
+1:      0.1244341    0.12098 0.7712933                    TRUE
+2:      0.1243115    0.12122 0.7699296                    TRUE
+3:      0.1241397    0.12146 0.7695107                    TRUE
+4:      0.1229117    0.12308 0.7659417                    TRUE
+5:      0.1159350    0.11550 0.7600843                   FALSE
+6:      0.1240554    0.12162 0.7004596                    TRUE
+
+Best model: logit 
+
+Lasso kept 66 of 217 candidate features (lambda.1se). Top 15 by |coef|:
+                        feature       coef
+ 1:           childrenfemale_na  2.0400259
+ 2:            maritalseparated  1.5951862
+ 3:        maritalnever_married  1.3482142
+ 4:             maritaldivorced  1.2910689
+ 5:              maritalwidowed  1.2457135
+ 6:     childrenunder6_and_6_17  0.9106769
+ 7:                    educgrad -0.8098772
+ 8: birth_regionpr_island_areas  0.6391779
+ 9:                      educba -0.5847234
+10:                     citizen -0.5349681
+11:            degree_field6199  0.5253298
+12:            birth_regionasia  0.3975915
+13:                     state24 -0.3941171
+14:                     state22  0.3622166
+15:                   raceblack  0.3537810
+
+Actual vs predicted in 2019 (model trained on 2016):
+          group_var        group       n     actual  predicted          gap
+ 1:             all          all 1830521 0.11498723 0.13285220 -0.017864968
+ 2:       age_group        35-44  366737 0.10213640 0.12017369 -0.018037299
+ 3:       age_group        25-34  372767 0.11636301 0.14610915 -0.029746143
+ 4:       age_group        55-64  476443 0.10181676 0.10805743 -0.006240672
+ 5:       age_group        45-54  395205 0.08839657 0.10591063 -0.017514059
+ 6:       age_group        18-24  219369 0.19218561 0.20875136 -0.016565753
+ 7:            educ        lt_hs  173629 0.24184319 0.27794756 -0.036104374
+ 8:            educ           hs  470167 0.14662896 0.17017227 -0.023543310
+ 9:            educ some_college  559046 0.11535541 0.13336658 -0.018011173
+10:            educ           ba  397547 0.05378456 0.06109498 -0.007310426
+11:            educ         grad  230132 0.03276860 0.03912052 -0.006351922
+12:             sex         male  893443 0.09890775 0.11820353 -0.019295778
+13:             sex       female  937078 0.13063940 0.14711158 -0.016472181
+14: hispanic_origin not_hispanic 1559956 0.10916372 0.12380053 -0.014636807
+15: hispanic_origin     hispanic  270565 0.14049869 0.17250549 -0.032006799
+16:          region        south  680733 0.12466650 0.14705311 -0.022386613
+17:          region         west  441511 0.10873349 0.13057660 -0.021843112
+18:          region    northeast  323675 0.10425542 0.11442936 -0.010173943
+19:          region      midwest  384602 0.11344236 0.12469623 -0.011253868
+
+Residual tree (2019):
+n= 200000 
+
+node), split, n, deviance, yval
+      * denotes terminal node
+
+1) root 200000 16859.4200 -0.01371957  
+  2) age< 18.5 3403   431.7594 -0.10164160 *
+  3) age>=18.5 196597 16400.9000 -0.01219768 *
+
+================================================================
+y5_poor: train on 2019, predict 2022   (2026-11-14 19:23:39)
+================================================================
+Rows: train sample 100000, test sample 50000, target year 1865263
+  fitted: logit ( - )
+  fitted: lasso ( lambda.1se = 0.00204 (lambda.min = 0.00055) )
+  fitted: ridge ( lambda.1se = 0.01220 (lambda.min = 0.00528) )
+  fitted: lda ( small feature set, 30 columns )
+  fitted: knn ( k = 50 (validation error 0.111 / 0.106 / 0.1092) )
+  fitted: tree ( cp = 0.00073, 10 leaves )
+
+Model comparison on the test set (2019):
+   model                                           tuning n_test mean_actual
+1: logit                                                -  50000     0.10518
+2: ridge      lambda.1se = 0.01220 (lambda.min = 0.00528)  50000     0.10518
+3: lasso      lambda.1se = 0.00204 (lambda.min = 0.00055)  50000     0.10518
+4:   lda                    small feature set, 30 columns  50000     0.10518
+5:   knn k = 50 (validation error 0.111 / 0.106 / 0.1092)  10000     0.10720
+6:  tree                          cp = 0.00073, 10 leaves  50000     0.10518
+   mean_predicted test_error       auc used_for_counterfactual
+1:      0.1078804    0.10312 0.7697389                    TRUE
+2:      0.1080414    0.10286 0.7693613                    TRUE
+3:      0.1080286    0.10288 0.7692132                    TRUE
+4:      0.1035971    0.10376 0.7670552                    TRUE
+5:      0.1046494    0.10510 0.7423268                   FALSE
+6:      0.1080239    0.10318 0.6865290                    TRUE
+
+Best model: logit 
+
+Lasso kept 46 of 228 candidate features (lambda.1se). Top 15 by |coef|:
+                        feature       coef
+ 1:           childrenfemale_na  2.3126578
+ 2:            maritalseparated  1.5420482
+ 3:        maritalnever_married  1.4509176
+ 4:             maritaldivorced  1.3372567
+ 5:              maritalwidowed  1.3142006
+ 6:     childrenunder6_and_6_17  0.8856689
+ 7:                    educgrad -0.5441669
+ 8:                      educba -0.5175855
+ 9: birth_regionpr_island_areas  0.4077761
+10:                     citizen -0.3792382
+11:                   educlt_hs  0.3303834
+12:                     state24 -0.3089895
+13:                      state5  0.2957032
+14:             female:educgrad -0.2874764
+15:              childrenunder6  0.2620658
+
+Actual vs predicted in 2022 (model trained on 2019):
+          group_var        group       n     actual  predicted           gap
+ 1:             all          all 1865263 0.11677531 0.11765461 -0.0008792980
+ 2:       age_group        35-44  394661 0.10469056 0.10078025  0.0039103085
+ 3:       age_group        18-24  224356 0.18717590 0.19099596 -0.0038200600
+ 4:       age_group        55-64  469990 0.11031307 0.10110684  0.0092062268
+ 5:       age_group        45-54  391578 0.08925344 0.09100129 -0.0017478516
+ 6:       age_group        25-34  384678 0.11507202 0.12747213 -0.0124001086
+ 7:            educ        lt_hs  172597 0.24249089 0.24261155 -0.0001206679
+ 8:            educ           hs  478779 0.15430707 0.15826169 -0.0039546184
+ 9:            educ some_college  535684 0.12025794 0.11995188  0.0003060645
+10:            educ         grad  253905 0.03513165 0.03662697 -0.0014953207
+11:            educ           ba  424298 0.05680445 0.05558313  0.0012213269
+12:             sex       female  951578 0.13276485 0.13033013  0.0024347161
+13:             sex         male  913685 0.10076628 0.10496363 -0.0041973505
+14: hispanic_origin not_hispanic 1557010 0.11099764 0.10984967  0.0011479666
+15: hispanic_origin     hispanic  308253 0.14048736 0.14968673 -0.0091993654
+16:          region        south  703912 0.12526841 0.13034558 -0.0050771746
+17:          region         west  451469 0.10945367 0.11424076 -0.0047870893
+18:          region    northeast  326390 0.10899289 0.10328741  0.0057054772
+19:          region      midwest  383492 0.11596304 0.10985999  0.0061030413
+
+Residual tree (2022):
+n= 200000 
+
+node), split, n, deviance, yval
+      * denotes terminal node
+
+1) root 200000 17526.930  0.0002139114  
+  2) age< 18.5 3577   436.982 -0.0884270000 *
+  3) age>=18.5 196423 17061.330  0.0018281240 *
+
+
+############## Variant: no_children ##############
+Features: ~age + I(age^2) + female + educ + hispanic + foreign_born + citizen + marital + state + years_in_us + birth_region + stem_degree + degree_field + female:educ + age:educ 
+
+================================================================
+y5_poor: train on 2016, predict 2019   (2026-11-14 19:26:18)
+================================================================
+Rows: train sample 100000, test sample 50000, target year 1830521
+  fitted: logit ( - )
+  fitted: lasso ( lambda.1se = 0.00209 (lambda.min = 0.00052) )
+  fitted: ridge ( lambda.1se = 0.02635 (lambda.min = 0.00542) )
+  fitted: lda ( small feature set, 22 columns )
+  fitted: knn ( k = 50 (validation error 0.1205 / 0.1188 / 0.119) )
+  fitted: tree ( cp = 0.00123, 1 leaves )
+
+Model comparison on the test set (2016):
+   model                                            tuning n_test mean_actual
+1: logit                                                 -  50000     0.12352
+2: ridge       lambda.1se = 0.02635 (lambda.min = 0.00542)  50000     0.12352
+3: lasso       lambda.1se = 0.00209 (lambda.min = 0.00052)  50000     0.12352
+4:   lda                     small feature set, 22 columns  50000     0.12352
+5:   knn k = 50 (validation error 0.1205 / 0.1188 / 0.119)  10000     0.11820
+6:  tree                            cp = 0.00123, 1 leaves  50000     0.12352
+   mean_predicted test_error       auc used_for_counterfactual
+1:      0.1244617    0.12406 0.7628607                    TRUE
+2:      0.1241597    0.12396 0.7609919                    TRUE
+3:      0.1243116    0.12374 0.7606716                    TRUE
+4:      0.1258973    0.12612 0.7592985                    TRUE
+5:      0.1188580    0.11890 0.7568215                   FALSE
+6:      0.1230400    0.12352 0.5000000                    TRUE
+
+Best model: logit 
+
+Lasso kept 52 of 193 candidate features (lambda.1se). Top 15 by |coef|:
+                        feature       coef
+ 1:            maritalseparated  1.6119065
+ 2:        maritalnever_married  1.3107237
+ 3:             maritaldivorced  1.2402247
+ 4:              maritalwidowed  1.1529000
+ 5:                    educgrad -0.8366271
+ 6: birth_regionpr_island_areas  0.6321570
+ 7:                      educba -0.6196495
+ 8:                     citizen -0.5483810
+ 9:                     state22  0.4079132
+10:            degree_field6199  0.3672948
+11:               female:educhs  0.3089878
+12:                     state24 -0.2931093
+13:                     state28  0.2436569
+14:                     state35  0.2365535
+15:            birth_regionasia  0.2310164
+
+Actual vs predicted in 2019 (model trained on 2016):
+          group_var        group       n     actual  predicted          gap
+ 1:             all          all 1830521 0.11498723 0.13274566 -0.017758436
+ 2:       age_group        35-44  366737 0.10213640 0.11842355 -0.016287155
+ 3:       age_group        25-34  372767 0.11636301 0.14237348 -0.026010467
+ 4:       age_group        55-64  476443 0.10181676 0.10656257 -0.004745809
+ 5:       age_group        45-54  395205 0.08839657 0.11027943 -0.021882860
+ 6:       age_group        18-24  219369 0.19218561 0.21262694 -0.020441334
+ 7:            educ        lt_hs  173629 0.24184319 0.28027078 -0.038427590
+ 8:            educ           hs  470167 0.14662896 0.16929470 -0.022665741
+ 9:            educ some_college  559046 0.11535541 0.13294198 -0.017586577
+10:            educ           ba  397547 0.05378456 0.06105443 -0.007269871
+11:            educ         grad  230132 0.03276860 0.03930245 -0.006533851
+12:             sex         male  893443 0.09890775 0.11742461 -0.018516866
+13:             sex       female  937078 0.13063940 0.14765956 -0.017020161
+14: hispanic_origin not_hispanic 1559956 0.10916372 0.12320482 -0.014041103
+15: hispanic_origin     hispanic  270565 0.14049869 0.17454191 -0.034043223
+16:          region        south  680733 0.12466650 0.14681116 -0.022144660
+17:          region         west  441511 0.10873349 0.13172609 -0.022992599
+18:          region    northeast  323675 0.10425542 0.11472375 -0.010468334
+19:          region      midwest  384602 0.11344236 0.12302652 -0.009584159
+
+Residual tree (2019):
+n= 200000 
+
+node), split, n, deviance, yval
+      * denotes terminal node
+
+1) root 200000 17338.4800 -0.01395175  
+  2) age< 18.5 3462   431.8853 -0.12007980 *
+  3) age>=18.5 196538 16866.9100 -0.01208232 *
+
+================================================================
+y5_poor: train on 2019, predict 2022   (2026-11-14 19:28:20)
+================================================================
+Rows: train sample 100000, test sample 50000, target year 1865263
+  fitted: logit ( - )
+  fitted: lasso ( lambda.1se = 0.00245 (lambda.min = 0.00055) )
+  fitted: ridge ( lambda.1se = 0.01339 (lambda.min = 0.00528) )
+  fitted: lda ( small feature set, 22 columns )
+  fitted: knn ( k = 50 (validation error 0.1118 / 0.109 / 0.1095) )
+  fitted: tree ( cp = 0.00095, 8 leaves )
+
+Model comparison on the test set (2019):
+   model                                            tuning n_test mean_actual
+1: logit                                                 -  50000     0.10518
+2: ridge       lambda.1se = 0.01339 (lambda.min = 0.00528)  50000     0.10518
+3: lasso       lambda.1se = 0.00245 (lambda.min = 0.00055)  50000     0.10518
+4:   lda                     small feature set, 22 columns  50000     0.10518
+5:   knn k = 50 (validation error 0.1118 / 0.109 / 0.1095)  10000     0.10740
+6:  tree                            cp = 0.00095, 8 leaves  50000     0.10518
+   mean_predicted test_error       auc used_for_counterfactual
+1:      0.1082719    0.10536 0.7605842                    TRUE
+2:      0.1084040    0.10518 0.7599521                    TRUE
+3:      0.1084132    0.10518 0.7593038                    TRUE
+4:      0.1099543    0.10614 0.7581176                    TRUE
+5:      0.1056457    0.10830 0.7455557                   FALSE
+6:      0.1084762    0.10564 0.7123056                    TRUE
+
+Best model: logit 
+
+Lasso kept 36 of 204 candidate features (lambda.1se). Top 15 by |coef|:
+                        feature       coef
+ 1:            maritalseparated  1.5473181
+ 2:        maritalnever_married  1.4454888
+ 3:             maritaldivorced  1.2831983
+ 4:              maritalwidowed  1.2184900
+ 5:                    educgrad -0.5635305
+ 6:                      educba -0.5519291
+ 7:                   educlt_hs  0.3760532
+ 8:                     citizen -0.3570610
+ 9: birth_regionpr_island_areas  0.3499861
+10:                      female  0.2591218
+11:             female:educgrad -0.2523796
+12:                      state5  0.2485257
+13:               female:educhs  0.2125103
+14:                     state24 -0.2105218
+15:                     state22  0.1821045
+
+Actual vs predicted in 2022 (model trained on 2019):
+          group_var        group       n     actual  predicted           gap
+ 1:             all          all 1865263 0.11677531 0.11543607  0.0013392413
+ 2:       age_group        35-44  394661 0.10469056 0.09698458  0.0077059783
+ 3:       age_group        18-24  224356 0.18717590 0.19140791 -0.0042320156
+ 4:       age_group        55-64  469990 0.11031307 0.09879790  0.0115151691
+ 5:       age_group        45-54  391578 0.08925344 0.09332124 -0.0040677969
+ 6:       age_group        25-34  384678 0.11507202 0.12114136 -0.0060693375
+ 7:            educ        lt_hs  172597 0.24249089 0.24901841 -0.0065275257
+ 8:            educ           hs  478779 0.15430707 0.15337198  0.0009350897
+ 9:            educ some_college  535684 0.12025794 0.11705549  0.0032024497
+10:            educ         grad  253905 0.03513165 0.03401263  0.0011190143
+11:            educ           ba  424298 0.05680445 0.05378663  0.0030178191
+12:             sex       female  951578 0.13276485 0.12881019  0.0039546562
+13:             sex         male  913685 0.10076628 0.10204564 -0.0012793607
+14: hispanic_origin not_hispanic 1557010 0.11099764 0.10897894  0.0020187020
+15: hispanic_origin     hispanic  308253 0.14048736 0.14193669 -0.0014493236
+16:          region        south  703912 0.12526841 0.12714196 -0.0018735558
+17:          region         west  451469 0.10945367 0.11235272 -0.0028990487
+18:          region    northeast  326390 0.10899289 0.10225340  0.0067394871
+19:          region      midwest  383492 0.11596304 0.10811083  0.0078522019
+
+Residual tree (2022):
+n= 200000 
+
+node), split, n, deviance, yval
+      * denotes terminal node
+
+1) root 200000 17877.21  0.001835020  
+  2) age< 18.5 3583   451.59 -0.093458550 *
+  3) age>=18.5 196417 17392.49  0.003573346 *
+
+
+================================================================
+SUMMARY: excess gap (percentage points) by variant
+================================================================
+          group_var        group main no_children with_race
+ 1:       age_group        18-24 1.68        1.62      1.27
+ 2:       age_group        25-34 2.04        1.99      1.73
+ 3:       age_group        35-44 2.42        2.40      2.19
+ 4:       age_group        45-54 1.77        1.78      1.58
+ 5:       age_group        55-64 1.68        1.63      1.54
+ 6:             all          all 1.94        1.91      1.70
+ 7:            educ           ba 1.02        1.03      0.85
+ 8:            educ         grad 0.74        0.77      0.49
+ 9:            educ           hs 2.44        2.36      1.96
+10:            educ        lt_hs 3.30        3.19      3.60
+11:            educ some_college 2.11        2.08      1.83
+12: hispanic_origin     hispanic 3.26        3.26      2.28
+13: hispanic_origin not_hispanic 1.65        1.61      1.58
+14:          region      midwest 1.86        1.74      1.74
+15:          region    northeast 1.73        1.72      1.59
+16:          region        south 2.04        2.03      1.73
+17:          region         west 2.02        2.01      1.71
+18:             sex       female 2.16        2.10      1.89
+19:             sex         male 1.73        1.72      1.51
+
+Weighted share of each race category by year:
+    race   2016   2019   2022
+1: white 0.7215 0.7127 0.5983
+2: black 0.1306 0.1328 0.1262
+3: asian 0.0596 0.0627 0.0648
+4: other 0.0883 0.0918 0.2107
+
+Finished: 2026-11-14 19:30:31 

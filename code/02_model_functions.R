@@ -1,61 +1,50 @@
-# =============================================================================
-# 02_model_functions.R
-# Helper functions for 03_run_models.R (this file is loaded with source()).
-# Nothing is run here - only settings and functions.
-# =============================================================================
+# 02_model_functions.R — settings and model functions used by 03-05 (sourced, runs nothing).
+# Documentation: code/README.md
 
 for (p in c("data.table", "glmnet")) {
   if (!requireNamespace(p, quietly = TRUE)) install.packages(p)
 }
 library(data.table)
-library(glmnet)    # ridge and lasso (lecture 7)
-library(MASS)      # LDA (lecture 5)
-library(class)     # KNN (lecture 6)
-library(rpart)     # decision trees (lecture 9)
-library(splines)   # natural splines (lecture 10)
+library(glmnet)
+library(MASS)
+library(class)
+library(rpart)
+library(splines)
 
-# ---- Settings -----------------------------------------------------------------
+# ---- Settings ------------------------------------------------------------------------
 
 SEED        <- 1
-TRAIN_N     <- 100000   # rows used to train the models (random sample of the training year)
-TEST_N      <- 50000    # rows used to compare the models (validation set approach, lecture 3)
-KNN_TRAIN_N <- 30000    # KNN is slow, so it gets a smaller sample
+TRAIN_N     <- 100000
+TEST_N      <- 50000
+KNN_TRAIN_N <- 30000
 KNN_TEST_N  <- 10000
-MIN_LEVEL_N <- 50       # rare categories (e.g. small degree fields) are merged into "other"
+MIN_LEVEL_N <- 50          # rarer categories are merged into "other"
+SAVE_PREDICTIONS <- TRUE   # person-level predictions for the cluster analysis
 
-FACTORS <- c("educ", "race", "marital", "state", "birth_region", "degree_field", "children")
+PRED_DIR <- "data/processed/predictions"
 
-# Classification outcomes (0/1); the others are regression
+FACTORS        <- c("educ", "race", "marital", "state", "birth_region", "degree_field", "children")
 CLASSIFICATION <- c("y1_employed", "y2_unemployed", "y5_poor")
 
-# Race (RAC1P) is NOT used: Census changed race coding in 2020, so the same person can get
-# a different race in 2019 and 2022 -> it would distort the counterfactual.
-# Checked in 04_robustness_y5.R (decision D15, docs/IDEAS.md). Hispanic origin is kept.
-
-# All candidate features: main effects + age^2 + interactions -> lasso chooses among them
+# Race is not used (coding changed in 2020, decision D15); see 04_robustness_race_children.R
 FORMULA_FULL <- ~ age + I(age^2) + female + educ + hispanic + foreign_born + citizen +
   marital + state + years_in_us + birth_region + stem_degree + degree_field + children +
   educ:female + age:educ
 
-# Same, but age enters through a natural spline (regression only)
 FORMULA_SPLINE <- ~ ns(age, df = 5) + female + educ + hispanic + foreign_born + citizen +
   marital + state + years_in_us + birth_region + stem_degree + degree_field + children +
   educ:female
 
-# Main effects only - for trees (they find interactions themselves)
 FORMULA_TREE <- ~ age + female + educ + hispanic + foreign_born + citizen + marital +
   state + years_in_us + birth_region + stem_degree + degree_field + children
 
-# Small set for LDA and KNN: they cannot handle hundreds of rare dummies
 FORMULA_SMALL <- ~ age + female + educ + hispanic + foreign_born + citizen + marital +
   years_in_us + birth_region + stem_degree + children
 
 with_y <- function(formula, y) update(formula, as.formula(paste(y, "~ .")))
 
+# ---- Data ----------------------------------------------------------------------------
 
-# ---- Data -----------------------------------------------------------------------
-
-# Loads one year and keeps only people who belong to the group of outcome y
 load_y <- function(year, y) {
   dt <- readRDS(file.path("data/processed", paste0("acs_", year, ".rds")))
   dt <- dt[!is.na(get(y))]
@@ -63,7 +52,6 @@ load_y <- function(year, y) {
   dt
 }
 
-# Splits the training year into a training sample and a test sample (they do not overlap)
 split_train_test <- function(dt) {
   n_test <- min(TEST_N, round(0.3 * nrow(dt)))
   idx    <- sample(nrow(dt))
@@ -73,13 +61,13 @@ split_train_test <- function(dt) {
   list(train = train, test = test)
 }
 
-# Makes the same categories in all tables: rare levels (by the training sample) -> "other"
+# Same factor levels in all tables; levels rare in the training sample -> "other"
 align_factors <- function(train, others) {
   for (f in FACTORS) {
     counts <- table(train[[f]])
     keep   <- names(counts)[counts >= MIN_LEVEL_N]
-    keep   <- keep[order(-counts[keep])]              # most common level = reference
-    lev    <- unique(c(keep, "other"))                  # "other" may already exist (race)
+    keep   <- keep[order(-counts[keep])]
+    lev    <- unique(c(keep, "other"))
     fix    <- function(x) factor(ifelse(x %in% keep, x, "other"), levels = lev)
     train[, (f) := fix(get(f))]
     for (d in others) d[, (f) := fix(get(f))]
@@ -87,19 +75,16 @@ align_factors <- function(train, others) {
   invisible(NULL)
 }
 
-
-# ---- Small helpers ---------------------------------------------------------------
+# ---- Helpers -------------------------------------------------------------------------
 
 wmean <- function(x, w) sum(x * w) / sum(w)
 
-# Area under the ROC curve (lecture 4), computed from ranks
 auc <- function(y, p) {
   r  <- rank(p)
   n1 <- as.numeric(sum(y == 1)); n0 <- as.numeric(sum(y == 0))
   (sum(r[y == 1]) - n1 * (n1 + 1) / 2) / (n1 * n0)
 }
 
-# Predicts a big table piece by piece (to save memory)
 predict_in_chunks <- function(predict_fun, data, chunk = 50000) {
   out <- numeric(nrow(data))
   for (start in seq(1, nrow(data), by = chunk)) {
@@ -109,10 +94,7 @@ predict_in_chunks <- function(predict_fun, data, chunk = 50000) {
   out
 }
 
-
-# ---- Models ------------------------------------------------------------------------
-# Every fit_* function returns a list: name, tuning (text) and predict(newdata).
-# predict() returns a probability of 1 (classification) or a value of y (regression).
+# ---- Models: each returns list(name, tuning, predict(newdata)) --------------------------
 
 fit_ols_or_logit <- function(train, y, is_class) {
   f <- with_y(FORMULA_FULL, y)
@@ -121,7 +103,7 @@ fit_ols_or_logit <- function(train, y, is_class) {
        predict = function(nd) suppressWarnings(as.numeric(predict(m, newdata = nd, type = "response"))))
 }
 
-# alpha = 1 -> lasso, alpha = 0 -> ridge; lambda chosen by 5-fold CV, we use lambda.1se
+# alpha = 1 lasso, alpha = 0 ridge; lambda by 5-fold CV, lambda.1se is used
 fit_glmnet <- function(train, y, is_class, alpha) {
   x  <- sparse.model.matrix(FORMULA_FULL, train)[, -1]
   cv <- cv.glmnet(x, train[[y]], alpha = alpha, nfolds = 5,
@@ -141,7 +123,7 @@ fit_spline <- function(train, y) {
        predict = function(nd) suppressWarnings(as.numeric(predict(m, newdata = nd))))
 }
 
-# LDA: dummies that do not vary inside one of the classes are dropped (LDA cannot use them)
+# Columns constant inside one class are dropped (LDA cannot use them)
 fit_lda <- function(train, y) {
   make_x <- function(d) model.matrix(FORMULA_SMALL, d)[, -1]
   x <- make_x(train)
@@ -153,7 +135,7 @@ fit_lda <- function(train, y) {
        predict = function(nd) as.numeric(predict(m, newdata = make_x(nd)[, keep, drop = FALSE])$posterior[, "1"]))
 }
 
-# Tree: grow a big tree, then prune it with the cp that has the lowest 5-fold CV error
+# Large tree pruned at the cp with the lowest 5-fold CV error
 fit_tree <- function(train, y, is_class) {
   d <- copy(train)
   if (is_class) d[, (y) := factor(get(y))]
@@ -169,8 +151,7 @@ fit_tree <- function(train, y, is_class) {
        })
 }
 
-# KNN (classification): k chosen on a validation part of the training sample.
-# Only for comparison on the test set - too slow to predict millions of people.
+# k chosen on a validation part; comparison only (too slow for millions of predictions)
 fit_knn <- function(train, y) {
   make_x <- function(d) model.matrix(FORMULA_SMALL, d)[, -1]
   tr <- train[sample(.N, min(.N, KNN_TRAIN_N))]
@@ -194,7 +175,6 @@ fit_knn <- function(train, y) {
        })
 }
 
-# Fits all models for one outcome; if one model fails, the others still run
 fit_all_models <- function(train, y) {
   is_class <- y %in% CLASSIFICATION
   tries <- if (is_class) {
@@ -219,8 +199,7 @@ fit_all_models <- function(train, y) {
   models
 }
 
-
-# ---- Evaluation on the test set ------------------------------------------------------
+# ---- Evaluation -----------------------------------------------------------------------
 
 evaluate_models <- function(models, test, y) {
   is_class <- y %in% CLASSIFICATION
@@ -244,11 +223,12 @@ evaluate_models <- function(models, test, y) {
   if (is_class) res[order(-auc)] else res[order(test_mse)]
 }
 
-# Best model = highest AUC (classification) or lowest test MSE (regression), KNN excluded
+# Best = highest AUC (classification) / lowest test MSE (regression); KNN excluded
 pick_best <- function(results) results[used_for_counterfactual == TRUE][1, model]
 
+# ---- Gaps: actual vs predicted, overall and by group ------------------------------------
 
-# ---- Gaps: actual vs predicted, overall and by groups ---------------------------------
+GROUP_VARS <- c("all", "age_group", "educ", "sex", "hispanic_origin", "region")
 
 add_groups <- function(dt) {
   dt[, age_group := cut(age, c(17, 24, 34, 44, 54, 64),
@@ -258,8 +238,6 @@ add_groups <- function(dt) {
   dt[, all := "all"]
   invisible(dt)
 }
-
-GROUP_VARS <- c("all", "age_group", "educ", "sex", "hispanic_origin", "region")   # no race: not comparable between years
 
 gap_table <- function(target, y) {
   add_groups(target)
@@ -275,8 +253,7 @@ gap_table <- function(target, y) {
   res
 }
 
-
-# ---- One step: train on one year, predict another -------------------------------------
+# ---- One step: train on train_year, predict target_year ---------------------------------
 
 run_pair <- function(train_year, target_year, y, out_dir) {
   cat("\n================================================================\n")
@@ -292,7 +269,6 @@ run_pair <- function(train_year, target_year, y, out_dir) {
   cat(sprintf("Rows: train sample %d, test sample %d, target year %d\n",
               nrow(parts$train), nrow(parts$test), nrow(target)))
 
-  # 1. Fit and compare the models
   models  <- fit_all_models(parts$train, y)
   results <- evaluate_models(models, parts$test, y)
   best    <- pick_best(results)
@@ -300,7 +276,6 @@ run_pair <- function(train_year, target_year, y, out_dir) {
   cat("\nModel comparison on the test set (", train_year, "):\n", sep = ""); print(results)
   cat("\nBest model:", best, "\n")
 
-  # 2. Features kept by lasso
   if (!is.null(models$lasso)) {
     sel <- models$lasso$selected[order(-abs(coef))]
     fwrite(sel, file.path(out_dir, sprintf("lasso_selected_%d.csv", train_year)))
@@ -309,20 +284,18 @@ run_pair <- function(train_year, target_year, y, out_dir) {
     print(head(sel, 15))
   }
 
-  # 3. Predict the target year with the best model and compare with reality
   target[, pred := predict_in_chunks(models[[best]]$predict, target)]
-  # person-level predictions are saved for the cluster analysis (05_clusters_types.R);
-  # data/ is not in git, files are ~20 MB each
-  pred_dir <- "data/processed/predictions"
-  dir.create(pred_dir, showWarnings = FALSE, recursive = TRUE)
-  saveRDS(target[, .(SERIALNO, SPORDER, pred)],
-          file.path(pred_dir, sprintf("%s_%d_from_%d.rds", y, target_year, train_year)))
+  if (SAVE_PREDICTIONS) {
+    dir.create(PRED_DIR, showWarnings = FALSE, recursive = TRUE)
+    saveRDS(target[, .(SERIALNO, SPORDER, pred)],
+            file.path(PRED_DIR, sprintf("%s_%d_from_%d.rds", y, target_year, train_year)))
+  }
   gaps <- gap_table(target, y)
   fwrite(gaps, file.path(out_dir, sprintf("gaps_%d_to_%d.csv", train_year, target_year)))
   cat(sprintf("\nActual vs predicted in %d (model trained on %d):\n", target_year, train_year))
   print(gaps)
 
-  # 4. Where is the gap largest? Regression tree on residuals (actual - predicted)
+  # Regression tree on residuals: where the prediction misses most
   s <- target[sample(.N, min(.N, 200000))]
   s[, resid := get(y) - pred]
   rt <- rpart(update(FORMULA_TREE, resid ~ .), data = s, method = "anova",
@@ -339,5 +312,19 @@ run_pair <- function(train_year, target_year, y, out_dir) {
   }
   cat("\nResidual tree (", target_year, "):\n", sep = ""); suppressWarnings(print(rt))
 
+  gaps
+}
+
+# Both steps for one outcome -> one table with gap_norm, gap_covid, gap_excess
+run_outcome <- function(y, out_dir) {
+  gaps_a <- run_pair(2016, 2019, y, out_dir)
+  gaps_b <- run_pair(2019, 2022, y, out_dir)
+  setnames(gaps_a, c("n", "actual", "predicted", "gap"),
+           c("n_2019", "actual_2019", "pred_2019_from_2016", "gap_norm"))
+  setnames(gaps_b, c("n", "actual", "predicted", "gap"),
+           c("n_2022", "actual_2022", "pred_2022_from_2019", "gap_covid"))
+  gaps <- merge(gaps_a, gaps_b, by = c("group_var", "group"), all = TRUE, sort = FALSE)
+  gaps[, gap_excess := gap_covid - gap_norm]
+  fwrite(gaps, file.path(out_dir, "gaps.csv"))
   gaps
 }

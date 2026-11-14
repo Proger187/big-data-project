@@ -1,46 +1,34 @@
-# =============================================================================
-# 01_prepare_data.R
-# Prepares ACS 1-year PUMS person files (2016, 2019, 2022) for the project.
-#
-# Input : two raw person files per year (a + b), listed in RAW_FILES below
-# Output: data/processed/acs_<year>.rds   people aged 18-64, features X, outcomes Y1-Y5
-#         outputs/prep_checks.csv         row counts, duplicates, sample sizes
-#         outputs/eda_means_by_year.csv   weighted means of Y1-Y5 by year
-#
-# All definitions follow docs/PLAN.md -> "Общие правила".
-# Run from the project root: open "final project.Rproj" in RStudio, then Source.
-# =============================================================================
+# 01_prepare_data.R — raw ACS PUMS person files (2016, 2019, 2022) -> data/processed/acs_<year>.rds
+# Documentation: code/README.md
 
 if (!requireNamespace("data.table", quietly = TRUE)) install.packages("data.table")
 library(data.table)
 
-# ---- 1. Settings -------------------------------------------------------------
+# ---- Settings ------------------------------------------------------------------------
 
-# Raw person files of each year (a + b). If you move or rename files, change only this list.
+# Raw person files (a + b) of each year
 RAW_FILES <- list(
   "2016" = c("data/ss16pusa.csv",   "data/ss16pusb.csv"),
   "2019" = c("data/psam_pusa_.csv", "data/psam_pusb_.csv"),
   "2022" = c("data/psam_pusa.csv",  "data/psam_pusb.csv")
 )
 
-# ADJINC is the same for all rows of one year -> used to check that files are not mixed up
+# ADJINC is constant within a year -> checks that files are not mixed up
 ADJINC_OF_YEAR <- c("2016" = 1007588, "2019" = 1010145, "2022" = 1042311)
 
 OUT_DATA <- "data/processed"
-OUT_TAB  <- "outputs"
+OUT_TAB  <- "outputs/00_data_checks"
 
-# CPI-U annual averages (BLS). All money is converted to 2022 dollars.
+# CPI-U annual averages (BLS), money in 2022 dollars
 CPI      <- c("2016" = 240.007, "2019" = 255.657, "2022" = 292.655)
 CPI_BASE <- CPI[["2022"]]
 
-# Columns we read from the raw files (everything else is skipped)
 COLS_MAIN  <- c("SERIALNO", "SPORDER", "ST", "PWGTP", "ADJINC",
                 "AGEP", "SEX", "SCHL", "RAC1P", "HISP", "NATIVITY", "CIT", "MAR",
                 "ESR", "WAGP", "WKHP", "POVPIP",
-                "YOEP", "WAOB", "SCIENGP", "FOD1P", "PAOC")         # extra features (docs/VARIABLES.md, group B)
-COLS_EXTRA <- c("JWTRNS", "JWTR", "COW", "JWMNP")  # for worker clusters; JWTR = old name of JWTRNS
+                "YOEP", "WAOB", "SCIENGP", "FOD1P", "PAOC")
+COLS_EXTRA <- c("JWTRNS", "JWTR", "COW", "JWMNP")   # JWTR = 2016 name of JWTRNS
 
-# Columns saved in the processed files
 KEEP <- c("year", "SERIALNO", "SPORDER", "PWGTP",
           "age", "female", "educ", "race", "hispanic", "foreign_born", "citizen",
           "marital", "state", "region",
@@ -52,25 +40,22 @@ dir.create(OUT_DATA, showWarnings = FALSE, recursive = TRUE)
 dir.create(OUT_TAB,  showWarnings = FALSE, recursive = TRUE)
 
 
-# ---- 2. Loading --------------------------------------------------------------
+# ---- Loading -------------------------------------------------------------------------
 
-# Returns the two person files of one year (only those that exist)
 find_person_files <- function(year) {
   files <- RAW_FILES[[as.character(year)]]
   files[file.exists(files)]
 }
 
-# Reads one csv file, only the columns we need
 read_person_file <- function(path) {
   header <- names(fread(path, nrows = 0))
   keep   <- header[toupper(header) %in% c(COLS_MAIN, COLS_EXTRA)]
-  serial <- keep[toupper(keep) == "SERIALNO"]          # read SERIALNO as text
+  serial <- keep[toupper(keep) == "SERIALNO"]
   dt <- fread(path, select = keep, colClasses = list(character = serial), showProgress = FALSE)
   setnames(dt, toupper(names(dt)))
   dt
 }
 
-# Reads files a and b of one year and stacks them
 load_year <- function(year) {
   files <- find_person_files(year)
   if (length(files) != 2) {
@@ -88,7 +73,7 @@ load_year <- function(year) {
   if (length(missing) > 0) {
     stop("Year ", year, ": missing columns: ", paste(missing, collapse = ", "))
   }
-  for (col in c("COW", "JWMNP")) {                      # in case an extra column is absent
+  for (col in c("COW", "JWMNP")) {
     if (!col %in% names(dt)) dt[, (col) := NA_integer_]
   }
   dt[, year := year]
@@ -96,17 +81,17 @@ load_year <- function(year) {
 }
 
 
-# ---- 3. Features X (the same for all models) ---------------------------------
+# ---- Features X ------------------------------------------------------------------------
 
 make_x <- function(dt) {
   dt[, age    := AGEP]
   dt[, female := as.integer(SEX == 2)]
 
-  dt[, educ := fcase(SCHL <= 15, "lt_hs",          # no high school diploma
-                     SCHL <= 17, "hs",             # high school / GED
-                     SCHL <= 20, "some_college",   # some college, associate
-                     SCHL == 21, "ba",             # bachelor
-                     SCHL >= 22, "grad")]          # master, professional, PhD
+  dt[, educ := fcase(SCHL <= 15, "lt_hs",
+                     SCHL <= 17, "hs",
+                     SCHL <= 20, "some_college",
+                     SCHL == 21, "ba",
+                     SCHL >= 22, "grad")]
   dt[, educ := factor(educ, levels = c("lt_hs", "hs", "some_college", "ba", "grad"))]
 
   dt[, race := fcase(RAC1P == 1, "white",
@@ -122,22 +107,18 @@ make_x <- function(dt) {
                          labels = c("married", "widowed", "divorced", "separated", "never_married"))]
   dt[, state  := factor(ST)]
 
-  # --- extra features (group B in docs/VARIABLES.md) ---
-  # years since entry to the US; 0 = no entry year (born in the US states)
+  # 0 years for people born in the US
   dt[, years_in_us := fifelse(!is.na(YOEP), as.integer(pmax(year - YOEP, 0)), 0L)]
 
-  # world area of birth
   dt[, birth_region := factor(WAOB, levels = 1:8,
                               labels = c("us", "pr_island_areas", "latin_america", "asia",
                                          "europe", "africa", "northern_america", "oceania"))]
 
-  # bachelor's degree in science / engineering (0 also for people without a bachelor's degree)
   dt[, stem_degree := as.integer(!is.na(SCIENGP) & SCIENGP == 1)]
 
-  # field of bachelor's degree (~170 codes); "no_ba" = no bachelor's degree
   dt[, degree_field := factor(fifelse(is.na(FOD1P), "no_ba", as.character(FOD1P)))]
 
-  # own children (asked only for women): age of children; men and women without an answer -> own category
+  # PAOC is asked only of women
   dt[, children := fcase(SEX == 1,     "male",
                          is.na(PAOC),  "female_na",
                          PAOC == 1,    "under6",
@@ -146,7 +127,7 @@ make_x <- function(dt) {
                          PAOC == 4,    "none")]
   dt[, children := factor(children, levels = c("none", "under6", "age6_17", "under6_and_6_17",
                                                "female_na", "male"))]
-  # Census region from state code (REGION column is missing in the 2016 person file)
+  # Census region from the state code (no REGION column in 2016)
   dt[, region := fcase(ST %in% c(9, 23, 25, 33, 34, 36, 42, 44, 50),                  "northeast",
                        ST %in% c(17, 18, 19, 20, 26, 27, 29, 31, 38, 39, 46, 55),       "midwest",
                        ST %in% c(1, 5, 10, 11, 12, 13, 21, 22, 24, 28, 37, 40, 45, 47,
@@ -157,20 +138,17 @@ make_x <- function(dt) {
 }
 
 
-# ---- 4. Outcomes Y1-Y5 (NA = person is not in the group of this outcome) -----
+# ---- Outcomes Y1-Y5 (NA = not in the population of this outcome) -------------------
 
 make_y <- function(dt, year) {
   cpi_factor <- CPI_BASE / CPI[[as.character(year)]]
 
-  # helper flags
   dt[, is_employed := ESR %in% c(1, 2, 4, 5)]
   dt[, in_lf       := ESR %in% c(1, 2, 3, 4, 5)]
   dt[, age_25_64   := AGEP >= 25 & AGEP <= 64]
   dt[, age_18_64   := AGEP >= 18 & AGEP <= 64]
 
-  # real annual wage in 2022 dollars:
-  # ADJINC/1e6 -> dollars of the survey year, CPI factor -> 2022 dollars
-  # (as.numeric: WAGP * ADJINC is too big for R integers and would become NA)
+  # as.numeric: WAGP * ADJINC overflows R integers
   dt[, wage_real := fifelse(WAGP > 0, as.numeric(WAGP) * (ADJINC / 1e6) * cpi_factor, NA_real_)]
 
   dt[, y1_employed   := fifelse(age_25_64, as.integer(is_employed), NA_integer_)]
@@ -182,10 +160,10 @@ make_y <- function(dt, year) {
 }
 
 
-# ---- 5. Extra variables for worker clusters -----------------------------------
+# ---- Variables for the worker clusters ----------------------------------------------
 
 make_extra <- function(dt) {
-  # means of transportation to work: JWTRNS (2019+) or JWTR (2016); code 11 = worked from home
+  # code 11 = worked from home
   if ("JWTRNS" %in% names(dt)) {
     dt[, wfh := fifelse(!is.na(JWTRNS), as.integer(JWTRNS == 11), NA_integer_)]
   } else if ("JWTR" %in% names(dt)) {
@@ -199,7 +177,7 @@ make_extra <- function(dt) {
 }
 
 
-# ---- 6. Checks ------------------------------------------------------------------
+# ---- Checks ---------------------------------------------------------------------------
 
 wmean <- function(y, w) {
   ok <- !is.na(y)
@@ -247,7 +225,7 @@ means_year <- function(dt, year) {
   )
 }
 
-# Values from docs/PROJECT.md (table 4.1) to compare with
+# Values computed on 10.11 (docs/PROJECT.md) to compare with
 EXPECTED <- data.table(
   year                 = c(2019, 2022),
   y1_employment_rate   = c(0.757, 0.765),
@@ -258,7 +236,7 @@ EXPECTED <- data.table(
 )
 
 
-# ---- 7. Main loop ----------------------------------------------------------------
+# ---- Main loop ------------------------------------------------------------------------
 
 checks <- list()
 means  <- list()
@@ -276,7 +254,7 @@ for (year in as.integer(names(RAW_FILES))) {
   make_y(dt, year)
   make_extra(dt)
 
-  dt <- dt[AGEP >= 18 & AGEP <= 64, ..KEEP]       # keep only adults 18-64 and needed columns
+  dt <- dt[AGEP >= 18 & AGEP <= 64, ..KEEP]
 
   out_file <- file.path(OUT_DATA, paste0("acs_", year, ".rds"))
   saveRDS(dt, out_file)
@@ -294,4 +272,4 @@ fwrite(means,  file.path(OUT_TAB, "eda_means_by_year.csv"))
 
 cat("\n==== Checks ====\n");                         print(checks)
 cat("\n==== Weighted means (our result) ====\n");     print(means)
-cat("\n==== Expected from docs/PROJECT.md ====\n");   print(EXPECTED)
+cat("\n==== Expected ====\n");                       print(EXPECTED)

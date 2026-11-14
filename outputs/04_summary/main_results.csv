@@ -1,0 +1,6 @@
+outcome,label,unit,actual_2019,actual_2022,gap_norm,gap_covid,gap_excess,model_2016,model_2019,metric_2016,metric_2019
+y1_employed,Employment rate,pp,0.7573,0.7651,2.19,1.04,-1.14,logit,logit,AUC 0.717,AUC 0.723
+y2_unemployed,Unemployment rate,pp,0.037,0.0351,-0.9,-0.09,0.81,logit,logit,AUC 0.663,AUC 0.674
+y3_log_wage,Real wage,% (log points x 100),10.7814,10.805,3.98,0.47,-3.51,ols,ols,"test MSE 0.697, R2 0.251","test MSE 0.695, R2 0.246"
+y4_hours,Weekly hours,hours,40.8098,40.7552,-0.02,-0.09,-0.07,spline_ols,spline_ols,"test MSE 117.412, R2 0.083","test MSE 120.717, R2 0.076"
+y5_poor,Poverty rate,pp,0.115,0.1168,-1.67,0.28,1.94,logit,logit,AUC 0.769,AUC 0.768
